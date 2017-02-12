@@ -76,7 +76,26 @@ router.post('/device/status/update', function(req, res, next){
 });
 
 router.post('/device/callsign/update', function(req, res, next){
+    Resource.findOne({ device : req.body.device }, function(err, device) {
+        if(!err){
+            if(!device){
+                res.json("Error Updating Status");
+            }
 
+            device.callsign = req.body.callsign;
+
+            device.save(function (err) {
+                if(!err){
+                    res.json("Status Updated");
+                } else {
+                    res.json("Error updating status");
+                }
+            });
+
+        } else {
+            res.json("Error Updating Status");
+        }
+    });
 });
 
 router.get('/updates', function(req, res, next) {
