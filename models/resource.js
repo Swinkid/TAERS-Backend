@@ -6,6 +6,8 @@ var resourceSchema = new Schema({
     callsign : String,
     status : String,
     type : String,
+    latestLatitude : Number,
+    latestLongitude : Number,
     lastUpdated : Date
 });
 

@@ -4,28 +4,30 @@ var router = express.Router();
 var mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/tears');
 
-var Location = require('../models/location');
 var Resource = require('../models/resource');
 
-router.post('/location', function(req, res, next) {
-    //TODO: Check & Validate
+router.post('/location/update', function (req, res, next) {
+    Resource.findOne({ device : req.body.device }, function(err, device) {
+        if(!err){
+            if(!device){
+                res.json("Error Updating Status");
+            }
 
-    var newLocation = Location({
-        device: req.body.device,
-        lat: req.body.lat,
-        long: req.body.long,
-        timestamp: new Date(req.body.timestamp),
-        received: new Date()
-    });
+            device.latestLatitude = req.body.lat;
+            device.latestLongitude = req.body.long;
+            device.lastUpdated = new Date();
 
-    newLocation.save(function (err) {
-        if (err) throw err;
+            device.save(function (err) {
+                if(!err){
+                    res.json("Status Updated");
+                } else {
+                    res.json("Error updating status");
+                }
+            });
 
-        if(err){
-            res.json("Internal Server Error");
+        } else {
+            res.json("Error Updating Status");
         }
-
-        res.json("Update Completed");
     });
 });
 
