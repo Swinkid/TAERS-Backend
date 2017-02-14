@@ -17,8 +17,6 @@ router.post('/location/update', function (req, res, next) {
             device.latestLongitude = req.body.long;
             device.lastUpdated = parseInt(new Date().getTime());
 
-		console.log(new Date().getTime() / 1000);
-
             device.save(function (err) {
                 if(!err){
                     res.json("Status Updated");
@@ -70,6 +68,7 @@ router.post('/device/status/update', function(req, res, next){
                     res.json("Status Updated");
                 } else {
                     res.json("Error updating status");
+                    console.log(err);
                 }
             });
 
