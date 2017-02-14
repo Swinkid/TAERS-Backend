@@ -61,7 +61,7 @@ router.post('/device/status/update', function(req, res, next){
             }
 
             device.status = req.body.status;
-            device.lastUpdated = new Date();
+            device.lastUpdated = parseInt(new Date().getTime());
 
             device.save(function (err) {
                 if(!err){
@@ -86,6 +86,7 @@ router.post('/device/callsign/update', function(req, res, next){
             }
 
             device.callsign = req.body.callsign;
+            device.lastUpdated = parseInt(new Date().getTime());
 
             device.save(function (err) {
                 if(!err){
