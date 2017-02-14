@@ -15,7 +15,9 @@ router.post('/location/update', function (req, res, next) {
 
             device.latestLatitude = req.body.lat;
             device.latestLongitude = req.body.long;
-            device.lastUpdated = new Date().getTime() / 1000;
+            device.lastUpdated = parseInt(new Date().getTime() / 1000);
+
+		console.log(new Date().getTime() / 1000);
 
             device.save(function (err) {
                 if(!err){

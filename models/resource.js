@@ -8,7 +8,7 @@ var resourceSchema = new Schema({
     type : String,
     latestLatitude : Number,
     latestLongitude : Number,
-    lastUpdated : Date
+    lastUpdated : Number
 });
 
 var Resource = mongoose.model('Resource', resourceSchema);
