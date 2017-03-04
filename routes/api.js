@@ -80,30 +80,44 @@ router.post('/device/status/update', function(req, res, next){
 
 router.post('/device/callsign/update', function(req, res, next){
     Resource.findOne({ device : req.body.device }, function(err, device) {
+        var data = {};
+
         if(!err){
             if(!device){
-                res.json("Error Updating Status");
+
+                data.status = "ERROR";
+                res.send(JSON.stringify(data));
             }
 
             device.callsign = req.body.callsign;
             device.lastUpdated = parseInt(new Date().getTime());
 
             device.save(function (err) {
+                var data = {};
+
                 if(!err){
-                    res.json("Status Updated");
+                    data.status = "OK";
                 } else {
-                    res.json("Error updating status");
+                    data.status = "ERROR";
                 }
+
+                res.send(JSON.stringify(data));
             });
 
         } else {
-            res.json("Error Updating Status");
+
+            data.status = "ERROR";
+            res.send(JSON.stringify(data));
         }
     });
 });
 
-router.get('/updates', function(req, res, next) {
-    res.json("Nothing to fetch");
+router.post('/updates', function(req, res, next) {
+    var data = {};
+
+    data.updateCount = 0;
+
+    res.send(JSON.stringify(data));
 });
 
 module.exports = router;
