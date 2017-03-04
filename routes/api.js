@@ -104,6 +104,7 @@ router.post('/device/callsign/update', function(req, res, next){
 
 router.get('/updates', function(req, res, next) {
     res.json("Nothing to fetch");
+
 });
 
 module.exports = router;
