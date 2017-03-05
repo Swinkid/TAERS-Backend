@@ -11,6 +11,8 @@ router.post('/location/update', function (req, res, next) {
 
     var requestData = JSON.parse(req.body);
 
+    console.log(requestData.device);
+
     Resource.findOne({ device : requestData.device }, function(err, device) {
         if(!err){
             if(!device){
