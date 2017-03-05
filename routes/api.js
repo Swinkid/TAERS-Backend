@@ -120,11 +120,43 @@ router.post('/device/callsign/update', function(req, res, next){
 });
 
 router.get('/updates/count', function(req, res, next) {
-    var data = {};
+    Update.count({device : req.body.device}, function (err, count) {
+        return count;
+    }).then(function (count) {
+        var data = {};
 
-    data.updateCount = 0;
+        data.updateCount = count;
 
-    res.send(JSON.stringify(data));
+        res.send(JSON.stringify(data));
+    });
+});
+
+router.post('/updates/get', function (req, res, next) {
+   Update.findOne({device : req.body.device}, function (err, update) {
+       var data = {};
+       if(!err){
+          if(!update){
+              data.status = "ERROR";
+              res.send(JSON.stringify(data));
+          }
+
+          return update;
+      } else {
+          data.status = "ERROR";
+          res.send(JSON.stringify(data));
+      }
+   })
+   .then(function (update) {
+       Update.remove({ _id: update._id}, function (err) {
+           var data = {};
+
+           data.status = "OK";
+           data.message = update.message;
+           data.added = update.added;
+
+           res.send(JSON.stringify(data));
+       });
+   });
 });
 
 router.post('/updates/add', function (req, res, next) {
