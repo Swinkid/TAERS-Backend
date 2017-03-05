@@ -17,6 +17,8 @@ router.post('/location/update', function (req, res, next) {
                 res.json("Error Updating Status");
             }
 
+            console.log(device);
+
             device.latestLatitude = req.body.lat;
             device.latestLongitude = req.body.long;
             device.lastUpdated = parseInt(new Date().getTime());
