@@ -5,6 +5,7 @@ var mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/tears');
 
 var Resource = require('../models/resource');
+var Update = require('../models/update');
 
 router.post('/location/update', function (req, res, next) {
     Resource.findOne({ device : req.body.device }, function(err, device) {
@@ -118,14 +119,57 @@ router.post('/device/callsign/update', function(req, res, next){
     });
 });
 
-router.post('/updates', function(req, res, next) {
+router.get('/updates/count', function(req, res, next) {
     var data = {};
 
     data.updateCount = 0;
-    data.status = "OK";
-    data.message = "Some other message";
 
     res.send(JSON.stringify(data));
 });
+
+router.post('/updates/add', function (req, res, next) {
+
+    Update.count({device : req.body.device}, function (err, count) {
+        return count;
+    })
+    .then(function (count) {
+        if(count == 0){
+            var update = Update({
+                device : req.body.device,
+                added : new Date().getTime(),
+                message : req.body.message
+            });
+
+
+            var data = {};
+
+            update.save(function (err) {
+                if (err) throw err;
+
+                if(err){
+                    data.status = "ERROR";
+                    res.send(JSON.stringify(data));
+                }
+
+                data.status = "OK";
+                res.send(JSON.stringify(data));
+            });
+        } else {
+            var data = {};
+            data.status = "ERROR";
+            res.send(JSON.stringify(data));
+        }
+    });
+});
+
+function getUpdates(device){
+    Update.find({device : device}, function (err, res) {
+        return res;
+    });
+}
+
+function countUpdates(device){
+
+}
 
 module.exports = router;
