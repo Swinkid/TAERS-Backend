@@ -9,9 +9,9 @@ var Resource = require('../models/resource');
 router.post('/location/update', function (req, res, next) {
     var data = {};
 
-    console.log(req.body);
+    var requestData = JSON.parse(req.body);
 
-    Resource.findOne({ device : req.body.device }, function(err, device) {
+    Resource.findOne({ device : requestData.device }, function(err, device) {
         if(!err){
             if(!device){
                 res.json("Error Updating Status");
