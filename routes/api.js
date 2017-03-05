@@ -7,12 +7,6 @@ mongoose.connect('mongodb://localhost/tears');
 var Resource = require('../models/resource');
 
 router.post('/location/update', function (req, res, next) {
-    var data = {};
-
-    var requestData = JSON.parse(req.body);
-
-    console.log(requestData.device);
-
     Resource.findOne({ device : requestData.device }, function(err, device) {
         if(!err){
             if(!device){
@@ -26,6 +20,7 @@ router.post('/location/update', function (req, res, next) {
             device.lastUpdated = parseInt(new Date().getTime());
 
             device.save(function (err) {
+                var data = {};
                 if(!err){
                     data.status = "OK";
                 } else {
@@ -36,12 +31,11 @@ router.post('/location/update', function (req, res, next) {
             });
 
         } else {
+            var data = {};
             data.status = "ERROR";
             res.send(JSON.stringify(data));
         }
     });
-
-
 });
 
 router.post('/device/add', function(req, res, next){
