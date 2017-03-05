@@ -7,29 +7,26 @@ mongoose.connect('mongodb://localhost/tears');
 var Resource = require('../models/resource');
 
 router.post('/location/update', function (req, res, next) {
-    Resource.findOne({ device : requestData.device }, function(err, device) {
+    Resource.findOne({ device : req.body.device }, function(err, device) {
         if(!err){
             if(!device){
                 res.json("Error Updating Status");
+            } else {
+                device.latestLatitude = req.body.lat;
+                device.latestLongitude = req.body.long;
+                device.lastUpdated = parseInt(new Date().getTime());
+
+                device.save(function (err) {
+                    var data = {};
+                    if(!err){
+                        data.status = "OK";
+                    } else {
+                        data.status = "ERROR";
+                    }
+
+                    res.send(JSON.stringify(data));
+                });
             }
-
-            console.log(device);
-
-            device.latestLatitude = req.body.lat;
-            device.latestLongitude = req.body.long;
-            device.lastUpdated = parseInt(new Date().getTime());
-
-            device.save(function (err) {
-                var data = {};
-                if(!err){
-                    data.status = "OK";
-                } else {
-                    data.status = "ERROR";
-                }
-
-                res.send(JSON.stringify(data));
-            });
-
         } else {
             var data = {};
             data.status = "ERROR";
