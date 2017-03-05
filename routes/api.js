@@ -136,7 +136,7 @@ router.post('/updates/get', function (req, res, next) {
        var data = {};
        if(!err){
           if(!update){
-              data.status = "ERROR";
+              data.status = "NO UPDATES";
               res.send(JSON.stringify(data));
           }
 
