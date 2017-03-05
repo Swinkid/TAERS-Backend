@@ -48,7 +48,9 @@ router.post('/device/add', function(req, res, next){
         callsign : req.body.callsign,
         status : 'OFFLINE',
         type : req.body.resourceType,
-        lastUpdated : new Date()
+        lastUpdated : new Date().getTime(),
+        latestLatitude : 0.00,
+        latestLongitude : 0.00
     });
 
     newDevice.save(function (err) {
