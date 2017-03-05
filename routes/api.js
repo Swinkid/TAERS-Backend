@@ -7,6 +7,8 @@ mongoose.connect('mongodb://localhost/tears');
 var Resource = require('../models/resource');
 
 router.post('/location/update', function (req, res, next) {
+    var data = {};
+
     Resource.findOne({ device : req.body.device }, function(err, device) {
         if(!err){
             if(!device){
@@ -19,16 +21,21 @@ router.post('/location/update', function (req, res, next) {
 
             device.save(function (err) {
                 if(!err){
-                    res.json("Status Updated");
+                    data.status = "OK";
                 } else {
-                    res.json("Error updating status");
+                    data.status = "ERROR";
                 }
+
+                res.send(JSON.stringify(data));
             });
 
         } else {
-            res.json("Error Updating Status");
+            data.status = "ERROR";
+            res.send(JSON.stringify(data));
         }
     });
+
+
 });
 
 router.post('/device/add', function(req, res, next){
@@ -116,6 +123,8 @@ router.post('/updates', function(req, res, next) {
     var data = {};
 
     data.updateCount = 0;
+    data.status = "OK";
+    data.message = "Some other message";
 
     res.send(JSON.stringify(data));
 });
