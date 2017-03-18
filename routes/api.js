@@ -197,21 +197,18 @@ router.post('/updates/add', function (req, res, next) {
     });
 });
 
+/**
+ * Users APIs
+ */
+
 router.get('/users/list', function (req, res, next) {
     User.find().select('-password').exec(function (err, data) {
         res.send(JSON.stringify(data));
     });
 });
 
-function getUpdates(device){
-    Update.find({device : device}, function (err, res) {
-        return res;
-    });
-}
-
-
 /**
- * Incident API's
+ * Incident APIs
  */
 
 router.post('/incident/add', function (req, res, next) {
