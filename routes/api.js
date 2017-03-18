@@ -8,6 +8,7 @@ var Resource = require('../models/resource');
 var Update = require('../models/update');
 var User = require('../models/user');
 var Incident = require('../models/incident');
+var Warning = require('../models/warning');
 
 router.post('/location/update', function (req, res, next) {
     Resource.findOne({ device : req.body.device }, function(err, device) {
@@ -253,6 +254,32 @@ router.get('/incident/all', function (req, res, next) {
 
         res.json(data);
     })
+});
+
+/**
+ * Warnings API
+ */
+router.post('/warnings/new', function (req, res, next) {
+    var warningData = {
+        location : req.body.location,
+        type : req.body.type,
+        details : req.body.details,
+        dateAdded : new Date().getTime()
+    };
+
+    warningData.save(function (err, warning) {
+        if(!err){
+            res.json(warning);
+        } else {
+            res.json("Internal Server Error");
+        }
+    });
+});
+
+router.get('/warnings', function (req, res, next) {
+    Warning.find({location : req.body.location}, function (err, data) {
+       res.json(data);
+    });
 });
 
 module.exports = router;
