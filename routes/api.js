@@ -7,6 +7,7 @@ mongoose.connect('mongodb://localhost/tears');
 var Resource = require('../models/resource');
 var Update = require('../models/update');
 var User = require('../models/user');
+var Incident = require('../models/incident');
 
 router.post('/location/update', function (req, res, next) {
     Resource.findOne({ device : req.body.device }, function(err, device) {
@@ -207,8 +208,51 @@ function getUpdates(device){
     });
 }
 
-function countUpdates(device){
 
-}
+/**
+ * Incident API's
+ */
+
+router.post('/incident/add', function (req, res, next) {
+    var newIncident = Incident({
+        location: req.body.location,
+        type : req.body.type,
+        status: req.body.status,
+        priority : req.body.status,
+        resourceId : '',
+        details : req.body.details
+    });
+
+    newIncident.save(function (err, incident) {
+        if (err) throw err;
+
+        if(err){
+            res.json("Internal Server Error");
+        }
+
+        res.json(incident._id);
+    });
+});
+
+
+router.get('/incident', function (req, res, next) {
+    Incident.findOne({_id : req.body.id }, function (err, data) {
+        if(err){
+            res.json("Internal Server Error");
+        }
+
+        res.json(data);
+    });
+});
+
+router.get('/incident/all', function (req, res, next) {
+    Incident.find({}, function (err, data) {
+        if(err){
+            res.json("Internal Server Error");
+        }
+
+        res.json(data);
+    })
+});
 
 module.exports = router;
