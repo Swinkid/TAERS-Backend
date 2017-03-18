@@ -1,11 +1,12 @@
 var express = require('express');
 var router = express.Router();
-
+var _ = require('lodash');
 var mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/tears');
 
 var Resource = require('../models/resource');
 var Update = require('../models/update');
+var User = require('../models/user');
 
 router.post('/location/update', function (req, res, next) {
     Resource.findOne({ device : req.body.device }, function(err, device) {
@@ -191,6 +192,12 @@ router.post('/updates/add', function (req, res, next) {
             data.status = "ERROR";
             res.send(JSON.stringify(data));
         }
+    });
+});
+
+router.get('/users/list', function (req, res, next) {
+    User.find().select('-password').exec(function (err, data) {
+        res.send(JSON.stringify(data));
     });
 });
 
