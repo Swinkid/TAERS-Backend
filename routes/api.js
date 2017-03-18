@@ -257,24 +257,33 @@ router.get('/incident/all', function (req, res, next) {
 /**
  * Warnings API
  */
-router.post('/warnings/new', function (req, res, next) {
-    var warningData = {
+router.post('/warning/new', function (req, res, next) {
+    var warningData = new Warning({
         location : req.body.location,
         type : req.body.type,
         details : req.body.details,
         dateAdded : new Date().getTime()
-    };
+    });
 
-    warningData.save(function (err, warning) {
-        if(!err){
-            res.json(warning);
-        } else {
+    warningData.save(function (err, incident) {
+        if (err) throw err;
+
+        if(err){
             res.json("Internal Server Error");
         }
+
+        res.json(incident);
     });
 });
 
-router.get('/warnings', function (req, res, next) {
+
+
+
+
+
+
+
+router.post('/warning', function (req, res, next) {
     Warning.find({location : req.body.location}, function (err, data) {
        res.json(data);
     });
