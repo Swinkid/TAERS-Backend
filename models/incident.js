@@ -7,7 +7,8 @@ var incidentSchema = new Schema({
     status : String,
     priority : String,
     resourceId : String,
-    details : String
+    details : String,
+    dateAdded : Number
 });
 
 var Incident = mongoose.model('Incident', incidentSchema);

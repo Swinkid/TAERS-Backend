@@ -216,9 +216,10 @@ router.post('/incident/add', function (req, res, next) {
         location: req.body.location,
         type : req.body.type,
         status: req.body.status,
-        priority : req.body.status,
+        priority : req.body.priority,
         resourceId : '',
-        details : req.body.details
+        details : req.body.details,
+        dateAdded : new Date().getTime()
     });
 
     newIncident.save(function (err, incident) {
