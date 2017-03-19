@@ -122,6 +122,22 @@ router.post('/device/callsign/update', function(req, res, next){
     });
 });
 
+router.post('/device/delete', function (req, res, next) {
+    var data = {};
+
+    Resource.findByIdAndRemove(req.body.id, function (err, resource) {
+        if(!err){
+            data.status = "OK";
+        } else {
+            data.status = "ERROR";
+        }
+
+        res.json(data);
+    });
+
+    //TODO FRONTEND
+});
+
 router.get('/updates/count', function(req, res, next) {
     Update.count({device : req.body.device}, function (err, count) {
         return count;
@@ -163,6 +179,10 @@ router.post('/updates/get', function (req, res, next) {
 });
 
 router.post('/updates/add', function (req, res, next) {
+
+    //TODO
+    //FIND INCIDENT, UPDATE RESOURCE ID
+    //LOOKUP INCIDENT, CONSTRUCT MESSAGE FROM TYPE & LOCATION
 
     Update.count({device : req.body.device}, function (err, count) {
         return count;
@@ -208,15 +228,15 @@ router.get('/users/list', function (req, res, next) {
 });
 
 router.post('/users/delete', function (req, res, next) {
-
+    // TODO
 });
 
 router.post('/users/update', function (req, res, next) {
-
+    // TODO
 });
 
 router.post('/users/add', function (req, res, next) {
-
+    // TODO
 });
 
 
@@ -246,6 +266,9 @@ router.post('/incident/add', function (req, res, next) {
     });
 });
 
+router.post('/incident/update', function (req, res, next) {
+    // TODO
+});
 
 router.get('/incident', function (req, res, next) {
     Incident.findOne({_id : req.body.id }, function (err, data) {
@@ -288,13 +311,6 @@ router.post('/warning/new', function (req, res, next) {
         res.json(incident);
     });
 });
-
-
-
-
-
-
-
 
 router.post('/warning', function (req, res, next) {
     Warning.find({location : req.body.location}, function (err, data) {
