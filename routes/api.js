@@ -208,7 +208,7 @@ router.post('/updates/add', function (req, res, next) {
                 var update = Update({
                     device : req.body.device,
                     added : new Date().getTime(),
-                    message : incident.type + "at" + incident.location
+                    message : incident.type + " \n " + incident.location
                 });
 
                 update.save(function (err) {
