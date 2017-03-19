@@ -207,6 +207,19 @@ router.get('/users/list', function (req, res, next) {
     });
 });
 
+router.post('/users/delete', function (req, res, next) {
+
+});
+
+router.post('/users/update', function (req, res, next) {
+
+});
+
+router.post('/users/add', function (req, res, next) {
+
+});
+
+
 /**
  * Incident APIs
  */
