@@ -179,7 +179,7 @@ router.post('/updates/get', function (req, res, next) {
 });
 
 router.post('/updates/add', function (req, res, next) {
-
+    var data = {};
     //TODO
     //FIND INCIDENT, UPDATE RESOURCE ID
     //LOOKUP INCIDENT, CONSTRUCT MESSAGE FROM TYPE & LOCATION
@@ -189,25 +189,38 @@ router.post('/updates/add', function (req, res, next) {
     })
     .then(function (count) {
         if(count == 0){
-            var update = Update({
-                device : req.body.device,
-                added : new Date().getTime(),
-                message : req.body.message
-            });
-
-
-            var data = {};
-
-            update.save(function (err) {
-                if (err) throw err;
-
+            Incident.findById(req.body.incidentId, function (err, incident) {
                 if(err){
+                    console.log(err);
                     data.status = "ERROR";
-                    res.send(JSON.stringify(data));
-                }
+                    res.json(data);
+                } else {
+                    incident.resourceId = req.body.device;
 
-                data.status = "OK";
-                res.send(JSON.stringify(data));
+                    incident.save(function (err) {
+                        if(err){
+                            console.log(err);
+                        }
+                        return incident;
+                    });
+                }
+            }).then(function (incident) {
+                var update = Update({
+                    device : req.body.device,
+                    added : new Date().getTime(),
+                    message : incident.type + "at" + incident.location
+                });
+
+                update.save(function (err) {
+                    if(err){
+                        data.status = "ERROR";
+                        res.send(JSON.stringify(data));
+                        console.log(err);
+                    }
+
+                    data.status = "OK";
+                    res.send(JSON.stringify(data));
+                });
             });
         } else {
             var data = {};
