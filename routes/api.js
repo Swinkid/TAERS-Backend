@@ -3,12 +3,17 @@ var router = express.Router();
 var _ = require('lodash');
 var mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/tears');
+var request = require('request');
 
 var Resource = require('../models/resource');
 var Update = require('../models/update');
 var User = require('../models/user');
 var Incident = require('../models/incident');
 var Warning = require('../models/warning');
+
+
+var GOOGLE_MAPS_GEOCODING_KEY = "&key=AIzaSyDPNPm8aY6sIMc83emA-J2m0wXJUv0MNpc";
+var GOOGLE_MAPS_GEOCODING_URL = "https://maps.googleapis.com/maps/api/geocode/json?address=";
 
 router.post('/location/update', function (req, res, next) {
     Resource.findOne({ device : req.body.device }, function(err, device) {
@@ -180,9 +185,6 @@ router.post('/updates/get', function (req, res, next) {
 
 router.post('/updates/add', function (req, res, next) {
     var data = {};
-    //TODO
-    //FIND INCIDENT, UPDATE RESOURCE ID
-    //LOOKUP INCIDENT, CONSTRUCT MESSAGE FROM TYPE & LOCATION
 
     Update.count({device : req.body.device}, function (err, count) {
         return count;
@@ -258,24 +260,41 @@ router.post('/users/add', function (req, res, next) {
  */
 
 router.post('/incident/add', function (req, res, next) {
-    var newIncident = Incident({
-        location: req.body.location,
-        type : req.body.type,
-        status: req.body.status,
-        priority : req.body.priority,
-        resourceId : '',
-        details : req.body.details,
-        dateAdded : new Date().getTime()
-    });
 
-    newIncident.save(function (err, incident) {
-        if (err) throw err;
+    var address = req.body.location;
 
-        if(err){
+    address = address.replace(/\s/g, "+");
+
+    var URL = GOOGLE_MAPS_GEOCODING_URL + address + GOOGLE_MAPS_GEOCODING_KEY;
+
+    request(URL, function (err, httpResponse, body) {
+        var location = JSON.parse(body).results[0].geometry.location;
+
+        if(location !== undefined || location !== 'undefined'){
+            var newIncident = Incident({
+                location: req.body.location,
+                type : req.body.type,
+                status: req.body.status,
+                priority : req.body.priority,
+                resourceId : '',
+                details : req.body.details,
+                dateAdded : new Date().getTime(),
+                lat : location.lat,
+                long: location.lng
+            });
+
+            newIncident.save(function (err, incident) {
+                if (err) throw err;
+
+                if(err){
+                    res.json("Internal Server Error");
+                }
+
+                res.json(incident._id);
+            });
+        } else {
             res.json("Internal Server Error");
         }
-
-        res.json(incident._id);
     });
 });
 
@@ -294,13 +313,24 @@ router.get('/incident', function (req, res, next) {
 });
 
 router.get('/incident/all', function (req, res, next) {
-    Incident.find({}, function (err, data) {
-        if(err){
-            res.json("Internal Server Error");
-        }
 
-        res.json(data);
-    })
+    if(req.query.type){
+        Incident.find({type: req.query.type}, function (err, data) {
+            if(err){
+                res.json("Internal Server Error");
+            }
+
+            res.json(data);
+        })
+    } else {
+        Incident.find({}, function (err, data) {
+            if(err){
+                res.json("Internal Server Error");
+            }
+
+            res.json(data);
+        })
+    }
 });
 
 /**
