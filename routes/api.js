@@ -45,26 +45,32 @@ router.post('/location/update', function (req, res, next) {
 });
 
 router.post('/device/add', function(req, res, next){
-    //TODO: Check & Validate
+    Resource.count({device : req.body.device}, function (err, count) {
+        return count;
+    }).then(function (count) {
+        if(count == 0){
+            var newDevice = Resource({
+                device : req.body.device,
+                callsign : req.body.callsign,
+                status : 'OFFLINE',
+                type : req.body.resourceType,
+                lastUpdated : new Date().getTime(),
+                latestLatitude : 0.00,
+                latestLongitude : 0.00
+            });
 
-    var newDevice = Resource({
-        device : req.body.device,
-        callsign : req.body.callsign,
-        status : 'OFFLINE',
-        type : req.body.resourceType,
-        lastUpdated : new Date().getTime(),
-        latestLatitude : 0.00,
-        latestLongitude : 0.00
-    });
+            newDevice.save(function (err) {
+                if (err) throw err;
 
-    newDevice.save(function (err) {
-        if (err) throw err;
+                if(err){
+                    res.json("Internal Server Error");
+                }
 
-        if(err){
-            res.json("Internal Server Error");
+                res.json("Update Completed");
+            });
+        } else {
+            res.json("Duplicate");
         }
-
-        res.json("Update Completed");
     });
 });
 
@@ -127,10 +133,12 @@ router.post('/device/callsign/update', function(req, res, next){
     });
 });
 
-router.post('/device/delete', function (req, res, next) {
+router.get('/device/delete', function (req, res, next) {
     var data = {};
 
-    Resource.findByIdAndRemove(req.body.id, function (err, resource) {
+    console.log(req.query);
+
+    Resource.findByIdAndRemove(req.query.id, function (err, resource) {
         if(!err){
             data.status = "OK";
         } else {
@@ -139,8 +147,6 @@ router.post('/device/delete', function (req, res, next) {
 
         res.json(data);
     });
-
-    //TODO FRONTEND
 });
 
 router.get('/updates/count', function(req, res, next) {
@@ -242,8 +248,10 @@ router.get('/users/list', function (req, res, next) {
     });
 });
 
-router.post('/users/delete', function (req, res, next) {
-    // TODO
+router.get('/users/delete', function (req, res, next) {
+    User.findByIdAndRemove(req.query.id, function (err, users) {
+        res.json(users);
+    });
 });
 
 router.post('/users/update', function (req, res, next) {
@@ -252,6 +260,14 @@ router.post('/users/update', function (req, res, next) {
 
 router.post('/users/add', function (req, res, next) {
     // TODO
+});
+
+router.get('/users', function (req, res, next) {
+   User.findOne({_id: req.query.id}, function (err, user) {
+      if(!err){
+          res.json(user);
+      }
+   });
 });
 
 
