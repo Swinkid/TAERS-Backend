@@ -20,7 +20,7 @@ app.use('/frontend', frontend);
 
 
 app.use(function(req, res, next) {
-  res.send(404).send("404");
+  res.json("404");
 });
 
 module.exports = app;
