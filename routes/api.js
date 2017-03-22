@@ -15,6 +15,35 @@ var Warning = require('../models/warning');
 var GOOGLE_MAPS_GEOCODING_KEY = "&key=AIzaSyDPNPm8aY6sIMc83emA-J2m0wXJUv0MNpc";
 var GOOGLE_MAPS_GEOCODING_URL = "https://maps.googleapis.com/maps/api/geocode/json?address=";
 
+router.get('/resource', function(req, res, next) {
+    if(req.query.status) {
+        Resource.find({status: req.query.status}, function (err, resources) {
+            if (!err) {
+                res.json(resources);
+            } else {
+                res.json("Error");
+            }
+        });
+
+    } else if(req.query.type){
+        Resource.find({type: req.query.type}, function (err, resources) {
+            if (!err) {
+                res.json(resources);
+            } else {
+                res.json("Error");
+            }
+        });
+    } else {
+        Resource.find({}, function(err, resources){
+            if(!err){
+                res.json(resources);
+            } else {
+                res.json("Error");
+            }
+        });
+    }
+});
+
 router.post('/location/update', function (req, res, next) {
     Resource.findOne({ device : req.body.device }, function(err, device) {
         if(!err){
