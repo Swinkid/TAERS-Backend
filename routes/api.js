@@ -73,6 +73,47 @@ router.post('/location/update', function (req, res, next) {
     });
 });
 
+router.post('/device/update', function (req, res, next) {
+   if(req.body.id){
+       Resource.findById(req.body.id, function(err, resource) {
+           if (err) {
+               res.json("Internal Server Error");
+           }
+
+           resource.device = req.body.device;
+           resource.callsign = req.body.callsign;
+           resource.type = req.body.resourceType;
+           resource.status = req.body.status;
+
+           // save the user
+           resource.save(function(err) {
+               if(err){
+                   res.json("Internal Server Error");
+               }
+
+               res.json("Update Completed");
+           });
+
+       });
+   } else {
+       res.json("Internal Server Error");
+   }
+});
+
+router.get('/device/get', function (req, res, next) {
+    if(req.query.id){
+        Resource.find({_id: req.query.id}, function (err, resources) {
+            if (!err) {
+                res.json(resources);
+            } else {
+                res.json("Internal Server Error");
+            }
+        });
+    } else {
+        res.json("Error")
+    }
+});
+
 router.post('/device/add', function(req, res, next){
     Resource.count({device : req.body.device}, function (err, count) {
         return count;
@@ -89,8 +130,6 @@ router.post('/device/add', function(req, res, next){
             });
 
             newDevice.save(function (err) {
-                if (err) throw err;
-
                 if(err){
                     res.json("Internal Server Error");
                 }
@@ -376,6 +415,16 @@ router.get('/incident/all', function (req, res, next) {
             res.json(data);
         })
     }
+});
+
+router.get('/incident/delete', function (req, res, next) {
+   if(req.query.id){
+       Incident.findByIdAndRemove(req.query.id, function (err, incident) {
+           res.json(incident);
+       });
+   } else {
+       res.json("Internal Server Error");
+   }
 });
 
 /**
