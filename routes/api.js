@@ -10,6 +10,7 @@ var Update = require('../models/update');
 var User = require('../models/user');
 var Incident = require('../models/incident');
 var Warning = require('../models/warning');
+var Audit = require('../models/audit');
 
 
 var GOOGLE_MAPS_GEOCODING_KEY = "&key=AIzaSyDPNPm8aY6sIMc83emA-J2m0wXJUv0MNpc";
@@ -157,7 +158,6 @@ router.post('/device/status/update', function(req, res, next){
                     res.json("Status Updated");
                 } else {
                     res.json("Error updating status");
-                    console.log(err);
                 }
             });
 
@@ -203,8 +203,6 @@ router.post('/device/callsign/update', function(req, res, next){
 
 router.get('/device/delete', function (req, res, next) {
     var data = {};
-
-    console.log(req.query);
 
     Resource.findByIdAndRemove(req.query.id, function (err, resource) {
         if(!err){
@@ -267,7 +265,6 @@ router.post('/updates/add', function (req, res, next) {
         if(count == 0){
             Incident.findById(req.body.incidentId, function (err, incident) {
                 if(err){
-                    console.log(err);
                     data.status = "ERROR";
                     res.json(data);
                 } else {
@@ -291,7 +288,6 @@ router.post('/updates/add', function (req, res, next) {
                     if(err){
                         data.status = "ERROR";
                         res.send(JSON.stringify(data));
-                        console.log(err);
                     }
 
                     data.status = "OK";
@@ -352,33 +348,53 @@ router.post('/incident/add', function (req, res, next) {
     var URL = GOOGLE_MAPS_GEOCODING_URL + address + GOOGLE_MAPS_GEOCODING_KEY;
 
     request(URL, function (err, httpResponse, body) {
-        var location = JSON.parse(body).results[0].geometry.location;
+        if(JSON.parse(body).results.length > 0){
+            var location = JSON.parse(body).results[0].geometry.location;
 
-        if(location !== undefined || location !== 'undefined'){
-            var newIncident = Incident({
-                location: req.body.location,
-                type : req.body.type,
-                status: req.body.status,
-                priority : req.body.priority,
-                resourceId : '',
-                details : req.body.details,
-                dateAdded : new Date().getTime(),
-                lat : location.lat,
-                long: location.lng
-            });
+            if(location !== undefined || location !== 'undefined'){
+                var newIncident = Incident({
+                    location: req.body.location,
+                    type : req.body.type,
+                    status: req.body.status,
+                    priority : req.body.priority,
+                    resourceId : '',
+                    details : req.body.details,
+                    dateAdded : new Date().getTime(),
+                    lat : location.lat,
+                    long: location.lng
+                });
 
-            newIncident.save(function (err, incident) {
-                if (err) throw err;
+                newIncident.save(function (err, incident) {
+                    if (err) throw err;
 
-                if(err){
-                    res.json("Internal Server Error");
-                }
+                    if(err){
+                        res.json("Internal Server Error");
+                    }
 
-                res.json(incident._id);
-            });
+                    res.json(incident._id);
+
+                    return incident;
+                }).then(function (incident) {
+                    var newAudit = Audit({
+                        user: req.body.author,
+                        action: 'New',
+                        context: 'Incident',
+                        created_at: new Date().getTime()
+                    });
+
+                    newAudit.save(function (err, audit) {
+                        if(err){
+                            console.log("Error auditing");
+                        }
+                    });
+                });
+            } else {
+                res.json("Internal Server Error");
+            }
         } else {
             res.json("Internal Server Error");
         }
+
     });
 });
 
@@ -421,6 +437,19 @@ router.get('/incident/delete', function (req, res, next) {
    if(req.query.id){
        Incident.findByIdAndRemove(req.query.id, function (err, incident) {
            res.json(incident);
+       }).then(function (incident) {
+           var newAudit = Audit({
+               user: req.query.author,
+               action: 'Delete',
+               context: 'Incident',
+               created_at: new Date().getTime()
+           });
+
+           newAudit.save(function (err, audit) {
+               if(err){
+                   console.log("Error auditing");
+               }
+           });
        });
    } else {
        res.json("Internal Server Error");
@@ -446,6 +475,19 @@ router.post('/warning/new', function (req, res, next) {
         }
 
         res.json(incident);
+    }).then(function (incident) {
+        var newAudit = Audit({
+            user: req.body.author,
+            action: 'New',
+            context: 'Warning',
+            created_at: new Date().getTime()
+        });
+
+        newAudit.save(function (err, audit) {
+            if(err){
+                console.log("Error auditing");
+            }
+        });
     });
 });
 
@@ -453,6 +495,39 @@ router.post('/warning', function (req, res, next) {
     Warning.find({location : req.body.location}, function (err, data) {
        res.json(data);
     });
+});
+
+
+/**
+ * Audit Logging API
+ */
+
+//TODO: Look in google keep for pagination example
+router.get('/auditlog', function (req, res, next) {
+    //TODO pagination, variable limit
+    Audit.find({}).sort({created_at: -1}).limit(100).exec(function (err, data) {
+       if(err){
+           res.json("Internal Server Error");
+       }
+
+       res.json(data);
+    });
+});
+
+/**
+ * /system/status
+ *
+ * Get system information, such as system time and status.
+ *
+ * @method GET
+ */
+router.get('/system/status', function (req, res, next) {
+   var system = {};
+
+   system.status = "OK";
+   system.time = new Date();
+
+    res.json(system);
 });
 
 module.exports = router;
