@@ -394,7 +394,20 @@ router.post('/users/add', function (req, res, next) {
                 }
 
                 res.json("Completed");
-            });
+            }).then(function (user) {
+                var newAudit = Audit({
+                    user: req.body.author,
+                    action: 'New',
+                    context: 'Users',
+                    created_at: new Date().getTime()
+                });
+
+                newAudit.save(function (err, audit) {
+                    if(err){
+                        console.log("Error auditing");
+                    }
+                });
+            });;
      } else {
             res.json("Duplicate");
         }
