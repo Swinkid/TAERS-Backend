@@ -93,7 +93,20 @@ router.post('/device/update', function (req, res, next) {
                }
 
                res.json("Update Completed");
-           });
+           }).then(function (incident) {
+               var newAudit = Audit({
+                   user: req.body.author,
+                   action: 'Edit',
+                   context: 'Resources',
+                   created_at: new Date().getTime()
+               });
+
+               newAudit.save(function (err, audit) {
+                   if(err){
+                       console.log("Error auditing");
+                   }
+               });
+           });;
 
        });
    } else {
@@ -212,7 +225,20 @@ router.get('/device/delete', function (req, res, next) {
         }
 
         res.json(data);
-    });
+    }).then(function (incident) {
+        var newAudit = Audit({
+            user: req.query.author,
+            action: 'Delete',
+            context: 'Resources',
+            created_at: new Date().getTime()
+        });
+
+        newAudit.save(function (err, audit) {
+            if(err){
+                console.log("Error auditing");
+            }
+        });
+    });;
 });
 
 router.get('/updates/count', function(req, res, next) {
@@ -307,7 +333,14 @@ router.post('/updates/add', function (req, res, next) {
  */
 
 router.get('/users/list', function (req, res, next) {
-    User.find().select('-password').exec(function (err, data) {
+
+    var options = {};
+
+    if(req.query.type){
+        options.jobtitle = req.query.type
+    }
+
+    User.find(options).select('-password').exec(function (err, data) {
         res.send(JSON.stringify(data));
     });
 });
@@ -315,6 +348,19 @@ router.get('/users/list', function (req, res, next) {
 router.get('/users/delete', function (req, res, next) {
     User.findByIdAndRemove(req.query.id, function (err, users) {
         res.json(users);
+    }).then(function (incident) {
+        var newAudit = Audit({
+            user: req.query.author,
+            action: 'Delete',
+            context: 'Users',
+            created_at: new Date().getTime()
+        });
+
+        newAudit.save(function (err, audit) {
+            if(err){
+                console.log("Error auditing");
+            }
+        });
     });
 });
 
@@ -323,7 +369,36 @@ router.post('/users/update', function (req, res, next) {
 });
 
 router.post('/users/add', function (req, res, next) {
-    // TODO
+    User.count({username : req.body.username}, function (err, count) {
+        if(err){
+            res.json("Internal Server Error");
+        }
+
+        return count;
+    }).then(function (count) {
+        if(count == 0){
+            var tempUser = new User();
+
+            tempUser.username = req.body.username;
+            tempUser.email = req.body.email;
+            tempUser.password = tempUser.generateHash(req.body.password);
+            tempUser.firstname = req.body.firstname;
+            tempUser.lastname = req.body.lastname;
+            tempUser.jobtitle = req.body.jobtitle;
+            tempUser.avatar = "//placehold.it/150x150";
+
+
+            tempUser.save(function (err) {
+                if(err){
+                    res.json("Internal Server Error");
+                }
+
+                res.json("Completed");
+            });
+     } else {
+            res.json("Duplicate");
+        }
+    });
 });
 
 router.get('/users', function (req, res, next) {
