@@ -9,6 +9,7 @@ var incidentSchema = new Schema({
     resourceId : String,
     details : String,
     dateAdded : Number,
+    timeClosed : Number,
     lat : Number,
     long : Number
 });

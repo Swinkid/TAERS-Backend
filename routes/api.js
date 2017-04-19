@@ -649,7 +649,7 @@ router.get('/system/stats', function (req, res, next) {
 
                                                            Resource.count({status: 'OFFLINE'}, function (err, offlineCount) {
 
-                                                               Incident.find({ dateAdded: {$gt: (new Date().getTime() - 6048000)}}, function (err, result) {
+                                                               Incident.find({ dateAdded: {$gt: (new Date().getTime() - 604800000)}}, function (err, result) {
                                                                    var response = {};
                                                                    response.incidents = {};
                                                                    response.warnings = {};
@@ -667,7 +667,6 @@ router.get('/system/stats', function (req, res, next) {
                                                                    response.week['saturday'] = [];
 
                                                                    _.forEach(result, function (val) {
-                                                                       console.log(new Date(val['dateAdded']).getDay());
                                                                        switch(new Date(val['dateAdded']).getDay()){
                                                                            case 0:
                                                                                response.week['sunday'].push(val);
@@ -691,9 +690,73 @@ router.get('/system/stats', function (req, res, next) {
                                                                                response.week['saturday'].push(val);
                                                                                break;
                                                                        }
+                                                                   });
 
-                                                                       console.log(val);
+                                                                   var averageResponse = 0;
+                                                                   var responseCount = 0;
 
+                                                                   _.forEach(result, function (entry) {
+                                                                      if(typeof entry['timeClosed'] !== undefined || entry['timeClosed'] !== 0){
+                                                                          averageResponse = averageResponse + (entry['timeClosed'] - entry['dateAdded']);
+                                                                          responseCount =  responseCount + 1;
+                                                                      }
+                                                                   });
+
+
+                                                                   var average = new Date(averageResponse / responseCount);
+
+                                                                   response.avgResponse = average.getHours() + " hr " + average.getMinutes() + " Mins ";
+
+                                                                   response.incident = {};
+                                                                   response.incident.types = {};
+                                                                   response.incident.types.RTC = 0;
+                                                                   response.incident.types.Drugs = 0;
+                                                                   response.incident.types.Theft = 0;
+                                                                   response.incident.types.Shoplifting = 0;
+                                                                   response.incident.types.ASB = 0;
+                                                                   response.incident.types.Burglary = 0;
+                                                                   response.incident.types.VC = 0;
+                                                                   response.incident.types.Robbery = 0;
+                                                                   response.incident.types.CD = 0;
+                                                                   response.incident.types.PW = 0;
+                                                                   response.incident.types.GR = 0;
+
+                                                                   _.forEach(result, function (r) {
+                                                                      switch(r['type']){
+                                                                          case "RTC":
+                                                                              response.incident.types.RTC += 1;
+                                                                              break;
+                                                                          case "Drugs":
+                                                                              response.incident.types.Drugs += 1;
+                                                                              break;
+                                                                          case "Theft":
+                                                                              response.incident.types.Theft += 1;
+                                                                              break;
+                                                                          case "Shoplifting":
+                                                                              response.incident.types.Shoplifting += 1;
+                                                                              break;
+                                                                          case "ASB":
+                                                                              response.incident.types.ASB += 1;
+                                                                              break;
+                                                                          case "Burglary":
+                                                                              response.incident.types.Burglary += 1;
+                                                                              break;
+                                                                          case "VC":
+                                                                              response.incident.types.VC += 1;
+                                                                              break;
+                                                                          case "Robbery":
+                                                                              response.incident.types.Robbery += 1;
+                                                                              break;
+                                                                          case "CD":
+                                                                              response.incident.types.CD += 1;
+                                                                              break;
+                                                                          case "PW":
+                                                                              response.incident.types.PW += 1;
+                                                                              break;
+                                                                          case "GR":
+                                                                              response.incident.types.GR += 1;
+                                                                              break;
+                                                                      }
                                                                    });
 
 
