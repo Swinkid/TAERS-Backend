@@ -407,7 +407,7 @@ router.post('/users/add', function (req, res, next) {
                         console.log("Error auditing");
                     }
                 });
-            });;
+            });
      } else {
             res.json("Duplicate");
         }
@@ -616,6 +616,92 @@ router.get('/system/status', function (req, res, next) {
    system.time = new Date();
 
     res.json(system);
+});
+
+router.get('/system/stats', function (req, res, next) {
+    Incident.count({status: 'Open'}, function (err, openCount) {
+
+        Incident.count({status: 'Resolved'}, function (err, closedCount) {
+
+            Warning.count({type: 'Violent'}, function (err, violentCount) {
+
+                Warning.count({type: 'General'}, function (err, generalCount) {
+
+                    Warning.count({type: 'Weapons'}, function (err, weaponsCount) {
+
+                        Warning.count({type: 'Entry Code'}, function (err, entryCodeCount) {
+
+                            User.count({jobtitle: 'Call Handler'}, function (err, callHandlerCount) {
+
+                                User.count({jobtitle: 'Analyst'}, function (err, analystCount) {
+
+                                    User.count({jobtitle: 'Manager'}, function (err, managerCount) {
+                                        
+                                        Resource.count({type: 'General'}, function (err, generalResCount) {
+
+                                            Resource.count({type: 'Traffic'}, function (err, trafficCount) {
+
+                                                Resource.count({type: 'Armed'}, function (err, armedCount) {
+
+                                                    Resource.count({type: 'Emergency'}, function (err, emergencyCount) {
+
+                                                        Resource.count({status: 'ONLINE'}, function (err, onlineCount) {
+
+                                                           Resource.count({status: 'OFFLINE'}, function (err, offlineCount) {
+
+                                                               var response = {};
+                                                               response.incidents = {};
+                                                               response.warnings = {};
+                                                               response.users = {};
+                                                               response.resources = {};
+                                                               response.resources.status = {};
+
+                                                               response.incidents['open'] = openCount;
+                                                               response.incidents['closed'] = closedCount;
+                                                               response.incidents['total'] = openCount + closedCount;
+
+                                                               response.warnings['violent'] = violentCount;
+                                                               response.warnings['general'] = generalCount;
+                                                               response.warnings['weapons'] = weaponsCount;
+                                                               response.warnings['entrycode'] = entryCodeCount;
+                                                               response.warnings['total'] = violentCount + generalCount + weaponsCount + entryCodeCount;
+
+                                                               response.users['callhandler'] = callHandlerCount;
+                                                               response.users['analyst'] = analystCount;
+                                                               response.users['managers'] = managerCount;
+                                                               response.users['total'] = callHandlerCount + analystCount + managerCount;
+
+                                                               response.resources['general'] = generalResCount;
+                                                               response.resources['armed'] = armedCount;
+                                                               response.resources['traffic'] = trafficCount;
+                                                               response.resources['emergency'] = emergencyCount;
+                                                               response.resources['total'] = generalResCount + armedCount + trafficCount + emergencyCount;
+
+                                                               response.resources.status['Online'] = onlineCount;
+                                                               response.resources.status['Offline'] = offlineCount;
+
+                                                               return res.json(response);
+                                                           });
+
+                                                        });
+                                                    });
+                                                });
+                                            });
+                                        });
+
+                                    });
+                                });
+                            });
+
+                        });
+                    });
+                });
+            });
+        });
+
+
+
+    });
 });
 
 module.exports = router;
