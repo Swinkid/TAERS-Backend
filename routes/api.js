@@ -106,7 +106,7 @@ router.post('/device/update', function (req, res, next) {
                        console.log("Error auditing");
                    }
                });
-           });;
+           });
 
        });
    } else {
@@ -542,6 +542,42 @@ router.get('/incident/delete', function (req, res, next) {
    } else {
        res.json("Internal Server Error");
    }
+});
+
+router.get('/incident/close', function (req, res, next) {
+    if(req.query.id){
+        Incident.findById(req.query.id, function(err, incident) {
+            if (err) {
+                res.json("Internal Server Error");
+            }
+
+            incident.timeClosed = new Date().getTime();
+            incident.status = "Resolved";
+
+            incident.save(function(err) {
+                if(err){
+                    res.json("Internal Server Error");
+                }
+
+                res.json("Update Completed");
+            }).then(function (incident) {
+                var newAudit = Audit({
+                    user: req.query.author,
+                    action: 'Close',
+                    context: 'Incidents',
+                    created_at: new Date().getTime()
+                });
+
+                newAudit.save(function (err, audit) {
+                    if(err){
+                        console.log("Error auditing");
+                    }
+                });
+            });
+        });
+    } else {
+        res.json("Internal Server Error");
+    }
 });
 
 /**
