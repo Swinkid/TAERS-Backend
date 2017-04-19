@@ -649,38 +649,80 @@ router.get('/system/stats', function (req, res, next) {
 
                                                            Resource.count({status: 'OFFLINE'}, function (err, offlineCount) {
 
-                                                               var response = {};
-                                                               response.incidents = {};
-                                                               response.warnings = {};
-                                                               response.users = {};
-                                                               response.resources = {};
-                                                               response.resources.status = {};
+                                                               Incident.find({ dateAdded: {$gt: (new Date().getTime() - 6048000)}}, function (err, result) {
+                                                                   var response = {};
+                                                                   response.incidents = {};
+                                                                   response.warnings = {};
+                                                                   response.users = {};
+                                                                   response.resources = {};
+                                                                   response.resources.status = {};
 
-                                                               response.incidents['open'] = openCount;
-                                                               response.incidents['closed'] = closedCount;
-                                                               response.incidents['total'] = openCount + closedCount;
+                                                                   response.week = {};
+                                                                   response.week['sunday'] = [];
+                                                                   response.week['monday'] = [];
+                                                                   response.week['tuesday'] = [];
+                                                                   response.week['wednesday'] = [];
+                                                                   response.week['thursday'] = [];
+                                                                   response.week['friday'] = [];
+                                                                   response.week['saturday'] = [];
 
-                                                               response.warnings['violent'] = violentCount;
-                                                               response.warnings['general'] = generalCount;
-                                                               response.warnings['weapons'] = weaponsCount;
-                                                               response.warnings['entrycode'] = entryCodeCount;
-                                                               response.warnings['total'] = violentCount + generalCount + weaponsCount + entryCodeCount;
+                                                                   _.forEach(result, function (val) {
+                                                                       console.log(new Date(val['dateAdded']).getDay());
+                                                                       switch(new Date(val['dateAdded']).getDay()){
+                                                                           case 0:
+                                                                               response.week['sunday'].push(val);
+                                                                               break;
+                                                                           case 1:
+                                                                               response.week['monday'].push(val);
+                                                                               break;
+                                                                           case 2:
+                                                                               response.week['tuesday'].push(val);
+                                                                               break;
+                                                                           case 3:
+                                                                               response.week['wednesday'].push(val);
+                                                                               break;
+                                                                           case 4:
+                                                                               response.week['thursday'].push(val);
+                                                                               break;
+                                                                           case 5:
+                                                                               response.week['friday'].push(val);
+                                                                               break;
+                                                                           case 6:
+                                                                               response.week['saturday'].push(val);
+                                                                               break;
+                                                                       }
 
-                                                               response.users['callhandler'] = callHandlerCount;
-                                                               response.users['analyst'] = analystCount;
-                                                               response.users['managers'] = managerCount;
-                                                               response.users['total'] = callHandlerCount + analystCount + managerCount;
+                                                                       console.log(val);
 
-                                                               response.resources['general'] = generalResCount;
-                                                               response.resources['armed'] = armedCount;
-                                                               response.resources['traffic'] = trafficCount;
-                                                               response.resources['emergency'] = emergencyCount;
-                                                               response.resources['total'] = generalResCount + armedCount + trafficCount + emergencyCount;
+                                                                   });
 
-                                                               response.resources.status['Online'] = onlineCount;
-                                                               response.resources.status['Offline'] = offlineCount;
 
-                                                               return res.json(response);
+                                                                   response.incidents['open'] = openCount;
+                                                                   response.incidents['closed'] = closedCount;
+                                                                   response.incidents['total'] = openCount + closedCount;
+
+                                                                   response.warnings['violent'] = violentCount;
+                                                                   response.warnings['general'] = generalCount;
+                                                                   response.warnings['weapons'] = weaponsCount;
+                                                                   response.warnings['entrycode'] = entryCodeCount;
+                                                                   response.warnings['total'] = violentCount + generalCount + weaponsCount + entryCodeCount;
+
+                                                                   response.users['callhandler'] = callHandlerCount;
+                                                                   response.users['analyst'] = analystCount;
+                                                                   response.users['managers'] = managerCount;
+                                                                   response.users['total'] = callHandlerCount + analystCount + managerCount;
+
+                                                                   response.resources['general'] = generalResCount;
+                                                                   response.resources['armed'] = armedCount;
+                                                                   response.resources['traffic'] = trafficCount;
+                                                                   response.resources['emergency'] = emergencyCount;
+                                                                   response.resources['total'] = generalResCount + armedCount + trafficCount + emergencyCount;
+
+                                                                   response.resources.status['Online'] = onlineCount;
+                                                                   response.resources.status['Offline'] = offlineCount;
+
+                                                                   return res.json(response);
+                                                               });
                                                            });
 
                                                         });
@@ -688,11 +730,9 @@ router.get('/system/stats', function (req, res, next) {
                                                 });
                                             });
                                         });
-
                                     });
                                 });
                             });
-
                         });
                     });
                 });
