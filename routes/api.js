@@ -738,10 +738,18 @@ router.get('/system/stats', function (req, res, next) {
                                                                       }
                                                                    });
 
+                                                                   var average;
+                                                                   response.avgResponse = "";
 
-                                                                   var average = new Date(averageResponse / responseCount);
+                                                                   if(isNaN(averageResponse / responseCount) === false){
+                                                                       average = new Date(averageResponse / responseCount);
+                                                                       response.avgResponse  = average.getHours() + " hr " + average.getMinutes() + " Mins ";
+                                                                   } else {
+                                                                       response.avgResponse = "No data available for 7 day average.";
+                                                                   }
 
-                                                                   response.avgResponse = average.getHours() + " hr " + average.getMinutes() + " Mins ";
+
+
 
                                                                    response.incident = {};
                                                                    response.incident.types = {};
