@@ -510,6 +510,16 @@ router.get('/incident/all', function (req, res, next) {
 
             res.json(data);
         })
+    }
+
+    if(req.query.filter) {
+        Incident.find({type: {"$in"  :  JSON.parse(req.query.filter)}}, function (err, data) {
+            if(err){
+                res.json("Internal Server Error");
+            }
+
+            res.json(data);
+        })
     } else {
         Incident.find({}, function (err, data) {
             if(err){
