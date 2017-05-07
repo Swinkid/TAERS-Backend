@@ -487,11 +487,35 @@ router.post('/incident/add', function (req, res, next) {
 });
 
 router.post('/incident/update', function (req, res, next) {
-    // TODO
+    Incident.findOne({ _id : req.body.id }, function(err, incident) {
+        if(!err){
+            if(!incident){
+                res.json("Error Updating incident");
+            }
+
+
+            incident.location = req.body.location;
+            incident.type = req.body.type;
+            incident.status = req.body.status;
+            incident.priority = req.body.priority;
+            incident.details = req.body.details;
+
+            incident.save(function (err) {
+                if(!err){
+                    res.json("incident Updated");
+                } else {
+                    res.json("Error updating status");
+                }
+            });
+
+        } else {
+            res.json("Error Updating incident");
+        }
+    });
 });
 
 router.get('/incident', function (req, res, next) {
-    Incident.findOne({_id : req.body.id }, function (err, data) {
+    Incident.findOne({_id : req.query.id }, function (err, data) {
         if(err){
             res.json("Internal Server Error");
         }
