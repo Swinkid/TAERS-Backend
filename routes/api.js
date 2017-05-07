@@ -885,4 +885,9 @@ router.get('/system/stats', function (req, res, next) {
     });
 });
 
+router.get('/status', function (req, res, next) {
+    res.send(JSON.stringify("OK"));
+});
+
+
 module.exports = router;
